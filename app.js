@@ -2,6 +2,12 @@ const   express             = require('express'),
         mongoose            = require('mongoose'),
         bodyParser          = require('body-parser'),
         methodOverride      = require('method-override'),
+        passport            = require('passport'),
+        LocalStrategy       = require('passport-local'),
+        TwitterStrategy     = require('passport-twitter').Strategy,
+        FacebookStrategy    = require('passport-facebook').Strategy,
+        GoogleStrategy      = require('passport-google-oauth').Strategy,
+        User                = require('./models/user'),
         app                 = express();
 
 // require routes
