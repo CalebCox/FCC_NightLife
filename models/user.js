@@ -1,5 +1,6 @@
 const mongoose                      = require('mongoose'),
-      passportLocalMongoose         = require('passport-local-mongoose');
+      passportLocalMongoose         = require('passport-local-mongoose'),
+      bcrypt                        = require('bcrypt-nodejs');
 
 let UserSchema  = new mongoose.Schema({
     local: {
@@ -23,13 +24,18 @@ let UserSchema  = new mongoose.Schema({
         token: String,
         email: String,
         name: String
-    },
-    profile: {
-        firstName: String,
-        lastName: String,
-        dateOfBirth: Date,
-        
     }
 });
+
+// methods
+// hash generation
+UserSchema.methods.generateHash = (password) => {
+    return bcrypt.hashSync(password, bcrypt.genSaltSync(8), null);
+};
+
+// check that password is valid
+UserSchema.methods.validPassword = (password) => {
+    return bcrypt.compareSync(password, this.local.password);
+}
 
 module.exports = mongoose.model('User', UserSchema);
