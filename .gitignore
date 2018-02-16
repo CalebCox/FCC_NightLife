@@ -1,2 +1,8 @@
 node_modules
 .env
+src/sass
+gulpfile.js
+package-lock.json
+package.json
+yarn.lock
+package.json

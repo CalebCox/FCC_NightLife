@@ -6,7 +6,7 @@ require('dotenv').config()
 
 // INDEX ROUTE
 router.get('/', (req, res) => {
-    res.send('Index working');
+    res.render("index");
 });
 
 // Authentication 
