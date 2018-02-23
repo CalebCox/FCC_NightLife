@@ -1,12 +1,10 @@
-const mongoose                      = require('mongoose'),
-      passportLocalMongoose         = require('passport-local-mongoose'),
-      bcrypt                        = require('bcrypt-nodejs');
+const mongoose                    = require('mongoose'),
+      passportLocalMongoose       = require('passport-local-mongoose');
 
 let UserSchema  = new mongoose.Schema({
-    local: {
-        username: String,
-        password: String,
-    },
+    email: String,
+    username: String,
+    password: String,
     twitter: {
         id: String,
         token: String,
@@ -27,15 +25,18 @@ let UserSchema  = new mongoose.Schema({
     }
 });
 
-// methods
-// hash generation
-UserSchema.methods.generateHash = (password) => {
-    return bcrypt.hashSync(password, bcrypt.genSaltSync(8), null);
-};
-
-// check that password is valid
-UserSchema.methods.validPassword = (password) => {
-    return bcrypt.compareSync(password, this.local.password);
-}
+UserSchema.plugin(passportLocalMongoose, {
+    usernameField: 'email',
+    errorMessages: {
+        MissingPasswordError: 'No password was given',
+        AttemptTooSoonError: 'Account is currently locked. Try again later',
+        TooManyAttemptsError: 'Account locked due to too many failed login attempts',
+        NoSaltValueStoredError: 'Authentication not possible. No salt value stored',
+        IncorrectPasswordError: 'Password or email are incorrect',
+        IncorrectUsernameError: 'Password or email are incorrect',
+        MissingUsernameError: 'No email was given',
+        UserExistsError: 'That email address is already in use!'
+    }
+});
 
 module.exports = mongoose.model('User', UserSchema);

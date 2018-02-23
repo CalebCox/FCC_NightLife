@@ -1,41 +1,66 @@
-const express           = require('express'),
-      router            = express.Router(),
-      middleware        = require('../middleware');
+let express     = require('express'),
+    router      = express.Router(),
+    passport    = require('passport'),
+    middleware  = require('../middleware/index'),
+    User        = require('../models/user');
 
 
-require('dotenv').config()
+// ROOT
 
-// INDEX ROUTE
 router.get('/', (req, res) => {
-    res.render("index");
+    res.render('index');
 });
 
-// Authentication testing...
+// AUTHENTICATION
+
+// register account
+router.get('/signup', (req, res) => {
+    res.render('signup');
+});
+
+// sign up logic
+router.post('/signup', (req, res) => {
+    let newUser = new User({email: req.body.email, username: req.body.username });
+    console.log(newUser);
+    User.register(newUser, req.body.password, (err, user) => {
+        if (err) {
+            req.flash('error', err.message);
+            console.log(err);
+            return res.redirect('signup');
+        }
+        passport.authenticate('local')(req, res, () => {
+            req.flash('success', 'Welcome to Cluster, ' + user.username);
+            res.redirect('/profile');
+        });
+    });
+});
+
+// login page
 router.get('/login', (req, res) => {
-    res.render('login', {message: req.flash('loginMessage')});
+    res.render('login');
 });
 
-// router.post('/login', (req, res) => {
-
-// });
-
-router.get ('/signup', (req, res) => {
-    res.render('signup', {message: req.flash('signupMessage')});
+// login logic
+router.post('/login', passport.authenticate('local', {
+    successRedirect: '/profile',
+    failureRedirect: '/login'
+    }), (req, res) => {
+        console.log(req.user);
 });
 
-// router.post('/signup', (req, res) => {
+// logout
+router.get('/logout', (req, res) => {
+    req.logout();
+    req.flash('success', 'Logged out successfully!');
+    res.redirect('/');
+});
 
-// });
+// PROFILE
 
 router.get('/profile', middleware.isLoggedIn, (req, res) => {
     res.render('profile', {
         user: req.user
     });
-});
-
-router.get('/logout', (req, res) => {
-    req.logout();
-    res.redirect('/');
 });
 
 module.exports = router;
